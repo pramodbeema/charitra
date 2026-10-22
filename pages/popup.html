@@ -1,0 +1,618 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHARITRA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/metro.css" />
+  <style>
+    body { width: 380px; height: 580px; overflow: hidden; background: var(--bg); }
+
+    .brand-name {
+      font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+      font-size: 26px; letter-spacing: 2px; color: var(--fg); line-height: 1;
+      text-shadow: 1px 1px 0 var(--accent-dark), 2px 2px 0 rgba(0,0,0,.6);
+    }
+    .brand-sub { font-size: 8px; text-transform: uppercase; letter-spacing: 2.5px; color: var(--accent-light); margin-top: 2px; }
+
+    /* Screens */
+    .lock-screen {
+      position: absolute; inset: 0; background: var(--bg);
+      flex-direction: column; align-items: center; justify-content: center;
+      z-index: 500; padding: 20px; gap: 12px;
+    }
+    .lock-screen-icon  { font-size: 40px; margin-bottom: 2px; }
+    .lock-screen-title {
+      font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+      font-size: 32px; letter-spacing: 3px; color: var(--fg);
+      text-shadow: 2px 2px 0 var(--accent-dark), 3px 3px 0 rgba(0,0,0,.5); line-height: 1;
+    }
+    .lock-screen-subtitle { font-size: 11px; color: var(--fg-secondary); text-align: center; max-width: 230px; }
+    .lock-form { width: 100%; max-width: 252px; display: flex; flex-direction: column; gap: 8px; }
+    .lock-error { color: var(--danger); font-size: 11px; min-height: 14px; text-align: center; }
+
+    /* Theme picker (setup) */
+    .theme-pick-row { display: flex; gap: 6px; width: 100%; max-width: 252px; }
+    .theme-pick-tile {
+      flex: 1; border: 2px solid var(--border); padding: 8px 4px 6px;
+      cursor: pointer; display: flex; flex-direction: column; align-items: center;
+      gap: 3px; background: var(--surface); transition: border-color var(--transition), background var(--transition);
+    }
+    .theme-pick-tile:hover  { background: var(--surface-hover); border-color: rgba(255,255,255,.3); }
+    .theme-pick-tile.active { border-color: var(--accent); background: rgba(0,120,212,.12); }
+    .theme-pick-tile .tpt-icon  { font-size: 18px; }
+    .theme-pick-tile .tpt-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--fg-secondary); }
+
+    /* Main app */
+    #mainApp { width:100%; height:580px; flex-direction:column; overflow:hidden; display:none; }
+
+    /* Topbar */
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 9px 16px 5px; flex-shrink:0; border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .topbar-right { display:flex; gap:4px; align-items:center; }
+    .topbar-icon-btn {
+      background:none; border:none; color:var(--fg-secondary); cursor:pointer;
+      padding: 3px 5px; font-size:15px; line-height:1; transition:color var(--transition);
+    }
+    .topbar-icon-btn:hover { color: var(--fg); }
+    .status-pill {
+      display:inline-flex; align-items:center; font-size:9px; padding:2px 6px;
+      background:var(--success); color:#fff; text-transform:uppercase; letter-spacing:.5px; font-weight:600;
+    }
+    .status-pill.off { background: var(--danger); }
+
+    /* Pivot */
+    .metro-pivot-header { padding: 0 16px; flex-shrink:0; }
+    .metro-pivot-tab { font-size: 14px; padding: 5px 10px 5px 0; }
+    .metro-pivot-body { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
+    .metro-pivot-panel { display:none; flex:1; min-height:0; overflow:hidden; flex-direction:column; }
+    .metro-pivot-panel.active { display:flex; }
+    .panel-inner { flex:1; overflow-y:auto; min-height:0; padding:6px 16px 0; display:flex; flex-direction:column; }
+
+    /* Tiles */
+    .dash-tiles { display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; margin-bottom:8px; }
+    .dash-tile  { background:var(--accent); padding:8px 8px 6px; cursor:pointer; transition:filter var(--transition); display:flex; flex-direction:column; gap:2px; min-height:54px; }
+    .dash-tile:hover  { filter:brightness(1.2); }
+    .dash-tile:active { filter:brightness(0.8); }
+    .dash-tile.neutral { background:#2a2a2a; }
+    [data-theme="light"] .dash-tile.neutral { background:#ccc; }
+    .tile-num { font-size:20px; font-weight:300; line-height:1; }
+    .tile-lbl { font-size:9px; text-transform:uppercase; letter-spacing:.8px; opacity:.85; }
+
+    /* Quick add */
+    .quick-add { display:flex; gap:4px; margin:5px 0 3px; }
+    .quick-add .metro-input { font-size:12px; padding:3px 0; }
+    .quick-add .metro-btn   { padding:4px 10px; font-size:11px; min-height:26px; }
+
+    /* Domain list */
+    .domain-list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; }
+    .domain-item { display:flex; align-items:center; gap:7px; padding:5px 0; border-bottom:1px solid var(--border); }
+    .domain-item:last-child { border-bottom:none; }
+    .domain-favicon { width:15px; height:15px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:8px; flex-shrink:0; }
+    .domain-name { flex:1; font-size:12px; font-weight:300; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .domain-del  { background:none; border:none; color:var(--fg-tertiary); cursor:pointer; font-size:12px; padding:1px 3px; line-height:1; transition:color var(--transition); }
+    .domain-del:hover { color:var(--danger); }
+    .domain-list-scroll { flex:1; overflow-y:auto; min-height:0; }
+
+    /* Vault list */
+    .vault-item  { padding:6px 0; border-bottom:1px solid var(--border); cursor:pointer; transition:padding-left var(--transition); }
+    .vault-item:last-child { border-bottom:none; }
+    .vault-item:hover { padding-left:3px; }
+    .vault-item-title { font-size:11px; font-weight:400; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .vault-item-meta  { font-size:9px; color:var(--fg-secondary); display:flex; gap:7px; margin-top:1px; }
+    .vault-item-checkbox { display:flex; align-items:flex-start; gap:7px; }
+    .vault-item-cb { margin-top:2px; width:12px; height:12px; accent-color:var(--accent); flex-shrink:0; }
+    .vault-list-scroll { flex:1; overflow-y:auto; min-height:0; }
+    .vault-actions-bar { display:flex; gap:4px; flex-wrap:wrap; padding:5px 0 2px; border-top:1px solid var(--border); }
+
+    /* Vault search bar */
+    .vault-search-bar { display:flex; gap:4px; align-items:flex-end; flex-wrap:wrap; margin-bottom:4px; }
+    .vault-search-bar .metro-input { font-size:12px; padding:3px 0; }
+    .vault-date-group { display:flex; gap:4px; align-items:flex-end; flex:1; min-width:160px; }
+    .vault-date-label { font-size:9px; text-transform:uppercase; letter-spacing:1.2px; color:var(--fg-secondary); white-space:nowrap; }
+
+    /* Settings */
+    .settings-scroll { flex:1; overflow-y:auto; padding:6px 16px 8px; min-height:0; }
+    .settings-section { margin-bottom:8px; }
+
+    /* Schedule rows */
+    #scheduleRows { padding: 4px 0 0 4px; }
+    .schedule-time-row { display:flex; gap:8px; align-items:flex-end; padding:2px 0; }
+    .schedule-time-row .metro-input-group { flex:1; margin-bottom:0; }
+
+    /* GitHub footer */
+    .github-footer {
+      text-align:center; padding:2px 0 5px; font-size:9px; color:var(--fg-tertiary);
+      flex-shrink:0; border-top:1px solid rgba(255,255,255,.05);
+    }
+    .github-footer a { color:var(--accent-light); text-decoration:none; }
+    .github-footer a:hover { text-decoration:underline; }
+
+    /* Snackbar */
+    #snack {
+      position:fixed; bottom:26px; left:10px; right:10px;
+      background:var(--accent); color:#fff; font-size:11px; padding:6px 12px;
+      z-index:9999; opacity:0; transform:translateY(5px);
+      transition:opacity 160ms, transform 160ms; pointer-events:none;
+    }
+    #snack.show  { opacity:1; transform:translateY(0); }
+    #snack.error { background:var(--danger); }
+
+    /* Color swatches */
+    .color-swatch { width:16px; height:16px; border:2px solid transparent; cursor:pointer; border-radius:0; transition:border-color 140ms; }
+    .color-swatch.active { border-color:white; }
+    [data-theme="light"] .color-swatch.active { border-color: #333; }
+
+    /* Dialogs */
+    .metro-overlay { display:none; }
+
+    /* Metro toggle label font */
+    .metro-toggle-label { font-size:12px; }
+
+    /* Setting hint text */
+    .setting-hint {
+      font-size:10px;
+      color:var(--fg-tertiary);
+      line-height:1.4;
+      padding:1px 0 6px 0;
+      font-weight:300;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOCK SCREEN ══ -->
+<div class="lock-screen" id="lockScreen" style="display:none;">
+  <div class="lock-screen-icon">🔒</div>
+  <div class="lock-screen-title">CHARITRA</div>
+  <div class="lock-screen-subtitle">Enter your vault password to continue</div>
+  <div class="lock-form">
+    <div class="metro-input-group" style="margin-bottom:0;">
+      <label class="metro-input-label">password</label>
+      <div class="metro-password-wrapper">
+        <input type="password" class="metro-input" id="lockPassword"
+               placeholder="your password" autocomplete="current-password" />
+        <button class="metro-password-reveal" id="lockReveal">👁</button>
+      </div>
+    </div>
+    <div class="lock-error" id="lockError"></div>
+    <button class="metro-btn accent full-width" id="lockUnlock">unlock</button>
+    <button class="metro-btn ghost full-width" id="lockForgot" style="font-size:10px;padding:3px;">
+      forgot password? reset vault
+    </button>
+  </div>
+</div>
+
+<!-- ══ SETUP SCREEN ══ -->
+<div class="lock-screen" id="setupScreen" style="display:none;">
+  <div class="lock-screen-icon">🛡</div>
+  <div class="lock-screen-title">SET UP VAULT</div>
+  <div class="lock-screen-subtitle">Create a password and choose your theme</div>
+  <div class="lock-form">
+    <!-- Privacy notice -->
+    <div style="background:rgba(0,120,212,0.12);border-left:3px solid var(--accent);padding:8px 11px;font-size:11px;color:var(--fg-secondary);line-height:1.5;">
+      🔐 <strong style="color:var(--fg);">No password recovery.</strong>
+      Your password is never stored. Forget it and everything is gone — permanently. Write it down somewhere safe.
+    </div>
+    <!-- Theme picker -->
+    <div>
+      <div class="metro-input-label" style="margin-bottom:5px;">choose theme</div>
+      <div class="theme-pick-row">
+        <div class="theme-pick-tile active" data-theme="dark" id="themePickerDark">
+          <span class="tpt-icon">🌑</span><span class="tpt-label">Dark</span>
+        </div>
+        <div class="theme-pick-tile" data-theme="light" id="themePickerLight">
+          <span class="tpt-icon">☀</span><span class="tpt-label">Light</span>
+        </div>
+        <div class="theme-pick-tile" data-theme="system" id="themePickerSystem">
+          <span class="tpt-icon">🌗</span><span class="tpt-label">System</span>
+        </div>
+      </div>
+    </div>
+    <div class="metro-input-group" style="margin-bottom:0;">
+      <label class="metro-input-label">new password</label>
+      <div class="metro-password-wrapper">
+        <input type="password" class="metro-input" id="setupPw1"
+               placeholder="min 6 characters" autocomplete="new-password" />
+        <button class="metro-password-reveal" id="setupReveal1">👁</button>
+      </div>
+    </div>
+    <div class="metro-input-group" style="margin-bottom:0;">
+      <label class="metro-input-label">confirm password</label>
+      <input type="password" class="metro-input" id="setupPw2"
+             placeholder="confirm password" autocomplete="new-password" />
+    </div>
+    <div class="metro-progress-bar" id="setupProgress" style="display:none;">
+      <div class="metro-progress-fill metro-progress-indeterminate"></div>
+    </div>
+    <div class="lock-error" id="setupError"></div>
+    <button class="metro-btn accent full-width" id="setupCreate">create vault</button>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="mainApp">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div>
+      <div class="brand-name">CHARITRA</div>
+      <div class="brand-sub">private history vault</div>
+    </div>
+    <div class="topbar-right">
+      <span id="guardStatus" class="status-pill" title="Click to toggle protection on/off" style="cursor:pointer;">ON</span>
+      <button class="topbar-icon-btn" id="btnOpenVault" title="Open full vault">⊞</button>
+      <button class="topbar-icon-btn" id="btnLock" title="Lock">🔒</button>
+    </div>
+  </div>
+
+  <!-- Pivot -->
+  <div class="metro-pivot" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+    <div class="metro-pivot-header" id="pivotHeader">
+      <button class="metro-pivot-tab active" data-tab="dashboard">dashboard</button>
+      <button class="metro-pivot-tab" data-tab="domains">blocked</button>
+      <button class="metro-pivot-tab" data-tab="vault">vault</button>
+      <button class="metro-pivot-tab" data-tab="settings">settings</button>
+    </div>
+
+    <div class="metro-pivot-body">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="metro-pivot-panel active" id="tab-dashboard">
+        <div class="panel-inner">
+
+          <!-- Current tab banner -->
+          <div id="currentTabBanner" style="display:none;margin-bottom:8px;">
+            <div style="font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent-light);margin-bottom:4px;">current tab</div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);padding:8px 10px;">
+
+              <!-- Domain row -->
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <span id="currentTabDomain" style="font-size:13px;font-weight:400;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+                <span id="currentTabBlocked" style="font-size:9px;text-transform:uppercase;letter-spacing:.5px;padding:1px 6px;background:var(--success);color:#fff;display:none;">blocked</span>
+              </div>
+
+              <!-- Checkboxes -->
+              <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px;">
+                <label style="display:flex;align-items:flex-start;gap:7px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" id="chkImportCurrent" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0;" />
+                  <span>
+                    <strong style="display:block;font-weight:400;">Bring history into vault</strong>
+                    <span style="font-size:10px;color:var(--fg-tertiary);">Copies this domain's existing browser history into your encrypted vault before blocking it.</span>
+                  </span>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:7px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" id="chkCleanupCurrent" style="margin-top:2px;accent-color:var(--accent);flex-shrink:0;" />
+                  <span>
+                    <strong style="display:block;font-weight:400;">Clean up browser history</strong>
+                    <span style="font-size:10px;color:var(--fg-tertiary);">Permanently deletes all existing visits to this domain from Chrome's history. Cannot be undone.</span>
+                  </span>
+                </label>
+              </div>
+
+              <!-- Single action button -->
+              <button class="metro-btn accent" id="btnBlockCurrent" style="font-size:10px;padding:4px 12px;min-height:unset;width:100%;">+ block this domain</button>
+              <div id="currentTabProgress" style="display:none;font-size:10px;color:var(--accent-light);margin-top:5px;text-align:center;"></div>
+            </div>
+          </div>
+
+          <div class="dash-tiles">
+            <div class="dash-tile" id="tile-blocked">
+              <div class="tile-num" id="tileBlockedCount">0</div>
+              <div class="tile-lbl">blocked</div>
+            </div>
+            <div class="dash-tile" id="tile-vault">
+              <div class="tile-num" id="tileVaultCount">0</div>
+              <div class="tile-lbl">captured</div>
+            </div>
+            <div class="dash-tile neutral">
+              <div class="tile-num" id="tileTodayCount">0</div>
+              <div class="tile-lbl">today</div>
+            </div>
+          </div>
+          <div class="metro-section-header">block this site</div>
+          <div class="quick-add">
+            <input type="text" class="metro-input flex-1" id="quickDomain" placeholder="example.com" />
+            <button class="metro-btn accent" id="btnQuickAdd">+ add</button>
+          </div>
+          <div id="quickAddFeedback" class="metro-caption" style="min-height:12px;"></div>
+          <div class="metro-section-header mt-8">recent captures</div>
+          <div id="recentList" class="metro-list"></div>
+        </div>
+      </div>
+
+      <!-- ── BLOCKED DOMAINS ── -->
+      <div class="metro-pivot-panel" id="tab-domains">
+        <div class="panel-inner">
+          <div class="metro-search" style="margin-bottom:5px;">
+            <input type="text" class="metro-search-input" id="domainSearch" placeholder="search domains…" />
+          </div>
+          <div class="quick-add">
+            <input type="text" class="metro-input flex-1" id="addDomainInput" placeholder="add domain.com" />
+            <button class="metro-btn accent" id="btnAddDomain">add</button>
+          </div>
+          <button class="metro-btn full-width mt-8" id="btnBulkAdd" style="font-size:11px;">
+            ⊞ bulk add (paste list)
+          </button>
+          <div class="domain-list-header mt-8">
+            <span class="metro-label" id="domainListCount">0 domains</span>
+            <button class="metro-btn ghost" id="btnClearDomains"
+                    style="font-size:10px;padding:1px 5px;min-height:unset;">clear all</button>
+          </div>
+          <div class="domain-list-scroll">
+            <div id="domainList" class="metro-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VAULT ── -->
+      <div class="metro-pivot-panel" id="tab-vault">
+        <div class="panel-inner">
+          <div class="metro-search" style="margin-bottom:4px;">
+            <input type="text" class="metro-search-input" id="vaultSearch" placeholder="search by title, domain, url…" />
+          </div>
+          <div class="vault-search-bar">
+            <div class="metro-input-group" style="margin-bottom:0;flex:1;">
+              <label class="metro-input-label" style="font-size:9px;">from</label>
+              <input type="date" class="metro-input metro-date-input" id="vaultDateFrom" />
+            </div>
+            <div class="metro-input-group" style="margin-bottom:0;flex:1;">
+              <label class="metro-input-label" style="font-size:9px;">to</label>
+              <input type="date" class="metro-input metro-date-input" id="vaultDateTo" />
+            </div>
+            <button class="metro-btn ghost" id="btnClearVaultSearch"
+                    style="font-size:10px;padding:2px 7px;min-height:unset;display:none;align-self:flex-end;">✕ clear</button>
+          </div>
+          <div class="metro-row space-between" style="margin-bottom:3px;">
+            <label class="metro-checkbox-wrapper" style="font-size:10px;color:var(--fg-secondary);gap:3px;">
+              <input type="checkbox" id="selectAllVault" />
+              <span class="metro-checkbox-box"><span class="metro-checkbox-check">✓</span></span>
+              <span style="margin-left:2px;">all</span>
+            </label>
+            <span class="metro-caption" id="vaultEntryCount">0 entries</span>
+          </div>
+          <div class="vault-list-scroll">
+            <div id="vaultList" class="metro-list"></div>
+          </div>
+          <div class="vault-actions-bar">
+            <button class="metro-btn" id="btnDeleteSelected" style="font-size:10px;padding:3px 8px;" disabled>delete selected</button>
+            <button class="metro-btn danger" id="btnClearVault" style="font-size:10px;padding:3px 8px;">clear all</button>
+            <button class="metro-btn" id="btnExportVault" style="font-size:10px;padding:3px 8px;">⬇ export</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="metro-pivot-panel" id="tab-settings">
+        <div class="settings-scroll">
+
+          <div class="metro-section-header">protection</div>
+          <div class="settings-section mt-8">
+            <div class="metro-caption" style="color:var(--fg-tertiary);padding:4px 0 6px;">
+              Toggle protection on/off using the <strong style="color:var(--accent-light);">ON/OFF</strong> button in the top-right corner.
+            </div>
+            <label class="metro-toggle">
+              <span class="metro-toggle-label">Lock vault when popup closes</span>
+              <input type="checkbox" id="lockOnCloseToggle" checked />
+              <div class="metro-toggle-track"></div>
+            </label>
+            <div class="setting-hint">Requires your password each time you open the popup.</div>
+            <label class="metro-toggle">
+              <span class="metro-toggle-label">Lock vault when window loses focus</span>
+              <input type="checkbox" id="lockOnBlurToggle" />
+              <div class="metro-toggle-track"></div>
+            </label>
+            <div class="setting-hint">Locks instantly when you switch to another app or window.</div>
+            <label class="metro-toggle">
+              <span class="metro-toggle-label">Auto-sweep on browser start</span>
+              <input type="checkbox" id="autoSweepToggle" checked />
+              <div class="metro-toggle-track"></div>
+            </label>
+            <div class="setting-hint">Scans and removes blocked domains from the last 7 days of history each time Chrome starts.</div>
+          </div>
+
+          <div class="metro-section-header">unlock</div>
+          <div class="settings-section mt-8">
+            <label class="metro-toggle">
+              <span class="metro-toggle-label">Auto-unlock as you type (no button press)</span>
+              <input type="checkbox" id="autoUnlockToggle" />
+              <div class="metro-toggle-track"></div>
+            </label>
+            <div class="setting-hint">Unlocks automatically the moment your typed password is correct — no need to press Unlock.</div>
+            <div class="metro-input-group mt-8">
+              <label class="metro-input-label">session timeout (minutes)</label>
+              <input type="number" class="metro-input" id="sessionTimeoutInput" min="1" max="1440" value="30" />
+              <div class="setting-hint" style="margin-top:3px;">Auto-locks after this many minutes of inactivity. Range: 1–1440.</div>
+            </div>
+          </div>
+
+          <div class="metro-section-header">schedule</div>
+          <div class="settings-section mt-8">
+            <label class="metro-toggle">
+              <span class="metro-toggle-label">Only active between set hours</span>
+              <input type="checkbox" id="scheduleToggle" />
+              <div class="metro-toggle-track"></div>
+            </label>
+            <div class="setting-hint">Outside the window, blocked domains are recorded normally in Chrome history.</div>
+            <div id="scheduleRows" style="display:none;">
+              <div class="schedule-time-row mt-8">
+                <div class="metro-input-group" style="flex:1;margin-bottom:0;">
+                  <label class="metro-input-label">active from</label>
+                  <input type="time" class="metro-input" id="scheduleStart" value="09:00" />
+                </div>
+                <div class="metro-input-group" style="flex:1;margin-bottom:0;">
+                  <label class="metro-input-label">until</label>
+                  <input type="time" class="metro-input" id="scheduleEnd" value="17:00" />
+                </div>
+              </div>
+              <div class="metro-caption mt-4" style="color:var(--fg-tertiary);">
+                Overnight ranges work too — e.g. 22:00 → 06:00.
+              </div>
+            </div>
+          </div>
+
+          <div class="metro-section-header">appearance</div>
+          <div class="settings-section mt-8">
+            <div class="metro-input-label" style="margin-bottom:5px;">theme</div>
+            <div class="setting-hint" style="margin-bottom:6px;">Controls light/dark appearance. System follows your OS preference.</div>
+            <div style="display:flex;gap:6px;margin-bottom:10px;">
+              <div class="theme-tile" data-theme="dark" style="flex:1;padding:8px 4px 6px;">
+                <span style="font-size:16px;">🌑</span>
+                <span style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--fg-secondary);margin-top:2px;">dark</span>
+              </div>
+              <div class="theme-tile" data-theme="light" style="flex:1;padding:8px 4px 6px;">
+                <span style="font-size:16px;">☀</span>
+                <span style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--fg-secondary);margin-top:2px;">light</span>
+              </div>
+              <div class="theme-tile" data-theme="system" style="flex:1;padding:8px 4px 6px;">
+                <span style="font-size:16px;">🌗</span>
+                <span style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--fg-secondary);margin-top:2px;">system</span>
+              </div>
+            </div>
+            <div class="metro-input-label" style="margin-bottom:3px;">accent color</div>
+            <div class="setting-hint" style="margin-bottom:6px;">Pick a highlight color for the UI. 8 Nokia Lumia-inspired options.</div>
+            <div class="metro-row" style="gap:5px;flex-wrap:wrap;padding:2px 0;">
+              <button class="color-swatch active" data-accent="blue"   style="background:#0078d4;"></button>
+              <button class="color-swatch" data-accent="red"    style="background:#e81123;"></button>
+              <button class="color-swatch" data-accent="cyan"   style="background:#00b4d8;"></button>
+              <button class="color-swatch" data-accent="green"  style="background:#107c10;"></button>
+              <button class="color-swatch" data-accent="purple" style="background:#881798;"></button>
+              <button class="color-swatch" data-accent="orange" style="background:#d83b01;"></button>
+              <button class="color-swatch" data-accent="teal"   style="background:#008272;"></button>
+              <button class="color-swatch" data-accent="pink"   style="background:#e3008c;"></button>
+            </div>
+          </div>
+
+          <div class="metro-section-header">change password</div>
+          <div class="settings-section mt-8">
+            <div class="setting-hint" style="margin-bottom:8px;">All vault data is re-encrypted with the new password. The old password becomes invalid immediately.</div>
+            <div class="metro-input-group">
+              <label class="metro-input-label">current password</label>
+              <input type="password" class="metro-input" id="chgPwCurrent" placeholder="current password" />
+            </div>
+            <div class="metro-input-group">
+              <label class="metro-input-label">new password</label>
+              <input type="password" class="metro-input" id="chgPwNew" placeholder="new password" />
+            </div>
+            <div class="metro-input-group">
+              <label class="metro-input-label">confirm new</label>
+              <input type="password" class="metro-input" id="chgPwConfirm" placeholder="confirm" />
+            </div>
+            <button class="metro-btn accent" id="btnChangePassword" style="font-size:11px;">change password</button>
+          </div>
+
+          <div class="metro-section-header">help &amp; danger zone</div>
+          <div class="settings-section mt-8" style="margin-bottom:16px;">
+            <button class="metro-btn full-width" id="btnOpenWelcome" style="font-size:11px;margin-bottom:5px;">
+              📖 view welcome / help page
+            </button>
+            <button class="metro-btn full-width" id="btnSweepNow" style="font-size:11px;margin-bottom:5px;">
+              🔄 sweep browser history now
+            </button>
+            <div class="setting-hint" style="margin-bottom:6px;">Immediately scans and removes all blocked domains from your last 7 days of browser history.</div>
+            <button class="metro-btn danger full-width" id="btnResetAll" style="font-size:11px;">
+              ⚠ reset everything
+            </button>
+            <div class="setting-hint" style="margin-bottom:2px;color:#f1707a;">Wipes the vault, all blocked domains, and your password. Cannot be undone.</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /pivot-body -->
+  </div><!-- /metro-pivot -->
+
+  <!-- GitHub footer -->
+  <div class="github-footer">
+    open source —
+    <a href="https://github.com/pramodbeema/CHARITRA" target="_blank">
+      github.com/pramodbeema/CHARITRA
+    </a>
+  </div>
+
+</div><!-- /mainApp -->
+
+<!-- ══ DIALOGS ══ -->
+
+<div class="metro-overlay" id="bulkDialog" style="display:none;">
+  <div class="metro-dialog">
+    <div class="metro-dialog-title">bulk add domains</div>
+    <div class="metro-dialog-body">
+      <div class="metro-input-group" style="margin-bottom:6px;">
+        <label class="metro-input-label">paste domains (one per line)</label>
+        <textarea class="metro-textarea" id="bulkTextarea" rows="6"
+          placeholder="google.com&#10;facebook.com&#10;https://twitter.com&#10;reddit.com"></textarea>
+      </div>
+      <div class="metro-caption" id="bulkPreviewCount"></div>
+    </div>
+    <div class="metro-dialog-actions">
+      <button class="metro-btn" id="bulkCancel">cancel</button>
+      <button class="metro-btn accent" id="bulkConfirm">add all</button>
+    </div>
+  </div>
+</div>
+
+<div class="metro-overlay" id="entryDialog" style="display:none;">
+  <div class="metro-dialog">
+    <div class="metro-dialog-title" id="entryDialogTitle">page visit</div>
+    <div class="metro-dialog-body">
+      <div class="metro-row gap-8 mb-8">
+        <span class="metro-label" style="width:44px;">domain</span>
+        <span class="text-accent metro-body" id="entryDialogDomain" style="flex:1;"></span>
+      </div>
+      <div class="metro-row gap-8 mb-8" style="align-items:flex-start;">
+        <span class="metro-label" style="width:44px;">url</span>
+        <span class="metro-caption" id="entryDialogUrl" style="flex:1;word-break:break-all;"></span>
+      </div>
+      <div class="metro-row gap-8">
+        <span class="metro-label" style="width:44px;">visited</span>
+        <span class="metro-caption" id="entryDialogTime"></span>
+      </div>
+    </div>
+    <div class="metro-dialog-actions">
+      <button class="metro-btn danger" id="entryDialogDelete">delete</button>
+      <button class="metro-btn" id="entryDialogClose">close</button>
+    </div>
+  </div>
+</div>
+
+<div class="metro-overlay" id="confirmDialog" style="display:none;">
+  <div class="metro-dialog">
+    <div class="metro-dialog-title" id="confirmTitle">are you sure?</div>
+    <div class="metro-dialog-body"><div class="metro-body" id="confirmBody"></div></div>
+    <div class="metro-dialog-actions">
+      <button class="metro-btn" id="confirmNo">cancel</button>
+      <button class="metro-btn danger" id="confirmYes">confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="metro-overlay" id="exportDialog" style="display:none;">
+  <div class="metro-dialog">
+    <div class="metro-dialog-title">export vault</div>
+    <div class="metro-dialog-body">
+      <p class="metro-body mb-8" style="font-size:11px;color:var(--fg-secondary);">
+        Export as unencrypted JSON. Keep it somewhere safe.
+      </p>
+      <div class="metro-input-group">
+        <label class="metro-input-label">confirm password</label>
+        <input type="password" class="metro-input" id="exportPassword" placeholder="re-enter your password" />
+      </div>
+      <div class="lock-error" id="exportError"></div>
+    </div>
+    <div class="metro-dialog-actions">
+      <button class="metro-btn" id="exportCancel">cancel</button>
+      <button class="metro-btn accent" id="exportConfirm">export</button>
+    </div>
+  </div>
+</div>
+
+<div id="snack"></div>
+
+<script type="module" src="../js/popup.js"></script>
+</body>
+</html>
