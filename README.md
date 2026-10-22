@@ -3,8 +3,8 @@
 > **Your private browsing history vault** — powered by AES-256-GCM encryption, dressed in Windows Phone / Nokia Lumia Metro style.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-yellow?logo=googlechrome)](https://github.com/pramodbeema/CHARITRA)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pramodbeema/CHARITRA/pulls)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-yellow?logo=googlechrome)](https://github.com/pramodbeema/charitra)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pramodbeema/charitra/pulls)
 
 ---
 
@@ -87,7 +87,7 @@ CHARITRA is a Chrome extension that silently removes specific domains from your 
 
 1. Clone or download this repository:
    ```
-   git clone https://github.com/pramodbeema/CHARITRA.git
+   git clone https://github.com/pramodbeema/charitra.git
    ```
 2. Open Chrome and navigate to `chrome://extensions/`
 3. Enable **Developer mode** (toggle in the top-right corner)
@@ -199,8 +199,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ---
 
 <div align="center">
-  <sub>Built with ❤ and the Nokia Lumia spirit &nbsp;·&nbsp; <a href="https://github.com/pramodbeema/CHARITRA">github.com/pramodbeema/CHARITRA</a></sub>
+  <sub>Built with ❤ and the Nokia Lumia spirit &nbsp;·&nbsp; <a href="https://github.com/pramodbeema/charitra">github.com/pramodbeema/CHARITRA</a></sub>
 </div>
-#   c h a r i t r a 
- 
- 
+#
