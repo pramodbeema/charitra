@@ -1,4 +1,4 @@
-﻿# CHARITRA
+# CHARITRA
 
 > **Your private browsing history vault** — powered by AES-256-GCM encryption, dressed in Windows Phone / Nokia Lumia Metro style.
 
@@ -201,5 +201,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 <div align="center">
   <sub>Built with ❤ and the Nokia Lumia spirit &nbsp;·&nbsp; <a href="https://github.com/pramodbeema/CHARITRA">github.com/pramodbeema/CHARITRA</a></sub>
 </div>
-#   c h a r i t r a  
- 
+#   c h a r i t r a 
+ 
+ 
