@@ -2,7 +2,7 @@
 
 > **Your private browsing history vault** — powered by AES-256-GCM encryption, dressed in Windows Phone / Nokia Lumia Metro style.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL v3](https://shields.io)](LICENSE)
 [![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-yellow?logo=googlechrome)](https://github.com/pramodbeema/charitra)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pramodbeema/charitra/pulls)
 
