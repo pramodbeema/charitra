@@ -1,4 +1,4 @@
-# CHARITRA
+﻿# CHARITRA
 
 > **Your private browsing history vault** — powered by AES-256-GCM encryption, dressed in Windows Phone / Nokia Lumia Metro style.
 
