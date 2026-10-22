@@ -1,0 +1,520 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to CHARITRA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Segoe+UI:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/metro.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--fg);
+      margin: 0;
+    }
+
+    .hero {
+      background: var(--accent);
+      padding: 48px 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '🔒';
+      position: absolute;
+      right: 40px;
+      top: 24px;
+      font-size: 80px;
+      opacity: 0.15;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+      font-size: 64px;
+      letter-spacing: 4px;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.3), 5px 5px 0 rgba(0,0,0,0.15);
+      margin-bottom: 8px;
+    }
+    .hero-sub {
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.5px;
+      max-width: 500px;
+    }
+    .hero-version {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 16px;
+    }
+
+    .shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 0 60px;
+    }
+
+    /* Pivot */
+    .pivot-header {
+      display: flex;
+      gap: 0;
+      padding: 0 40px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-alt);
+    }
+    .pivot-tab {
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--fg-tertiary);
+      padding: 14px 18px 14px 0;
+      cursor: pointer;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color var(--transition);
+      outline: none;
+      white-space: nowrap;
+    }
+    .pivot-tab.active { color: var(--fg); border-bottom-color: var(--accent); }
+    .pivot-tab:hover:not(.active) { color: var(--fg-secondary); }
+
+    .panel { display: none; padding: 32px 40px; }
+    .panel.active { display: block; animation: fadeIn 200ms ease; }
+
+    @keyframes fadeIn { from { opacity:0; transform: translateX(10px); } to { opacity:1; transform:none; } }
+
+    /* Features grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px 18px;
+      border-left: 3px solid var(--accent);
+    }
+    .feature-card-icon { font-size: 22px; margin-bottom: 6px; }
+    .feature-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .feature-card-desc {
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--fg-secondary);
+      line-height: 1.5;
+    }
+
+    /* Steps */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      flex-shrink: 0;
+      color: #fff;
+    }
+    .step-content { flex: 1; }
+    .step-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .step-desc { font-size: 12px; color: var(--fg-secondary); line-height: 1.5; font-weight: 300; }
+
+    /* Shortcut section */
+    .shortcut-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .shortcut-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .shortcut-desc {
+      font-size: 12px;
+      color: var(--fg-secondary);
+      line-height: 1.6;
+      margin-bottom: 12px;
+      font-weight: 300;
+    }
+    .kbd {
+      display: inline-block;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--accent-light);
+      margin: 0 2px;
+    }
+    .shortcut-platforms {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .platform-card {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+    }
+    .platform-os { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-light); margin-bottom: 4px; }
+    .platform-shortcut { font-size: 13px; font-weight: 300; }
+    .platform-shortcut .kbd { font-size: 11px; }
+
+    .open-shortcuts-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      border: none;
+      color: #fff;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background var(--transition);
+    }
+    .open-shortcuts-btn:hover { background: var(--accent-light); }
+
+    /* Security section */
+    .security-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .security-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--success);
+      padding: 14px;
+    }
+    .security-item-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .security-item-desc  { font-size: 11px; color: var(--fg-secondary); line-height: 1.5; font-weight: 300; }
+
+    /* CTA */
+    .cta-bar {
+      background: var(--accent);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cta-text { font-size: 16px; font-weight: 300; }
+    .cta-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cta-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 16px;
+      cursor: pointer;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background var(--transition);
+      display: inline-flex;
+      align-items: center;
+    }
+    .cta-btn:hover { background: rgba(255,255,255,0.25); }
+    .cta-btn.primary { background: #000; border-color: #000; }
+    .cta-btn.primary:hover { background: #222; }
+
+    /* GitHub badge */
+    .github-bar {
+      background: var(--bg-alt);
+      padding: 12px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .github-bar a { color: var(--accent-light); font-size: 13px; text-decoration: none; }
+    .github-bar a:hover { text-decoration: underline; }
+    .github-star {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--fg-secondary);
+    }
+
+    /* Section heading */
+    .section-heading {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="shell">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-title">CHARITRA</div>
+    <div class="hero-sub">Your private browsing history vault — powered by AES-256 encryption, dressed in Windows Phone Metro style.</div>
+    <div class="hero-version">Version 1.0 &nbsp;·&nbsp; Chrome Extension &nbsp;·&nbsp; Open Source</div>
+  </div>
+
+  <!-- Pivot -->
+  <div class="pivot-header" id="pivotHeader">
+    <button class="pivot-tab active" data-tab="overview">overview</button>
+    <button class="pivot-tab" data-tab="quickstart">quick start</button>
+    <button class="pivot-tab" data-tab="shortcut">keyboard shortcut</button>
+    <button class="pivot-tab" data-tab="security">security</button>
+  </div>
+
+  <!-- Overview -->
+  <div class="panel active" id="tab-overview">
+    <div class="section-heading">what CHARITRA does</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">🛡</div>
+        <div class="feature-card-title">Block Domains</div>
+        <div class="feature-card-desc">Any domain you add is silently wiped from Chrome's browsing history the moment you visit it.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔒</div>
+        <div class="feature-card-title">Encrypted Vault</div>
+        <div class="feature-card-desc">Blocked visits are saved in an AES-256-GCM encrypted vault. Unreadable without your password — even from the filesystem.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">⊞</div>
+        <div class="feature-card-title">Bulk Import</div>
+        <div class="feature-card-desc">Paste a list of domains and block them all in one click. Supports URLs, bare domains, and www variants.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔍</div>
+        <div class="feature-card-title">Advanced Search</div>
+        <div class="feature-card-desc">Search captured visits by keyword, domain, page title, and date range. Sort and filter however you like.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">📊</div>
+        <div class="feature-card-title">Analytics</div>
+        <div class="feature-card-desc">See your top blocked domains, monthly activity heatmap, and hourly browsing patterns.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">⏱</div>
+        <div class="feature-card-title">Schedule</div>
+        <div class="feature-card-desc">Set a time window for when the extension should be active. Perfect for focus hours.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🌗</div>
+        <div class="feature-card-title">Dark / Light / System Theme</div>
+        <div class="feature-card-desc">Choose a theme that suits you. System mode follows your OS preference automatically.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🎨</div>
+        <div class="feature-card-title">Metro Accent Colors</div>
+        <div class="feature-card-desc">8 accent colors inspired by the Nokia Lumia palette. Blue, red, cyan, green, purple, orange, teal, pink.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">⬇</div>
+        <div class="feature-card-title">Export Vault</div>
+        <div class="feature-card-desc">Export your vault as JSON after re-confirming your password. Keep your own backup.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">metro ui</div>
+    <p style="font-size:13px;font-weight:300;color:var(--fg-secondary);line-height:1.7;max-width:600px;">
+      The UI is built entirely on the <strong style="color:var(--fg);">Windows Phone / Nokia Lumia Metro design language</strong> — flat tiles, pivot navigation, Bebas Neue titles, Segoe UI body text, and the iconic accent color system. The extension popup is 380 × 580 px, and a full-page vault opens in a separate tab for power users.
+    </p>
+  </div>
+
+  <!-- Quick Start -->
+  <div class="panel" id="tab-quickstart">
+    <div class="section-heading">getting started</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Set up your vault password</div>
+          <div class="step-desc">Click the CHARITRA icon in your toolbar. You'll be asked to create a vault password (minimum 6 characters). This password is never stored — only a PBKDF2 hash is kept. Don't forget it.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Add domains to block</div>
+          <div class="step-desc">Type a domain in the "block this site" box on the dashboard and press Enter or click "+&nbsp;add". Use the Blocked tab for the full domain manager, or click "⊞ bulk add" to paste a list of many domains at once.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Browse normally</div>
+          <div class="step-desc">Visit any blocked domain. CHARITRA silently deletes it from Chrome's history within 1.5 seconds and queues the visit for your encrypted vault. No trace in the browser.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Review your vault</div>
+          <div class="step-desc">Unlock the extension and open the Vault tab, or click ⊞ to open the full vault page. Search by keyword or date range, sort columns, select entries for bulk delete, or export your data.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Tune settings</div>
+          <div class="step-desc">In Settings you can: change your password, pick a theme, pick an accent color, set auto-lock timeout, enable lock-on-blur, set a schedule for when the extension is active, and toggle auto-unlock on correct password entry.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcut -->
+  <div class="panel" id="tab-shortcut">
+    <div class="section-heading">set up a keyboard shortcut</div>
+
+    <div class="shortcut-box">
+      <div class="shortcut-title">Why set a shortcut?</div>
+      <div class="shortcut-desc">
+        Chrome extensions can be assigned a custom keyboard shortcut so you can open CHARITRA instantly — no need to find the toolbar icon. You set this yourself in Chrome's extension shortcut manager.
+      </div>
+
+      <div class="shortcut-platforms">
+        <div class="platform-card">
+          <div class="platform-os">Windows / Linux</div>
+          <div class="platform-shortcut">
+            Recommended: <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">Shift</kbd> + <kbd class="kbd">H</kbd>
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-os">macOS</div>
+          <div class="platform-shortcut">
+            Recommended: <kbd class="kbd">⌘</kbd> + <kbd class="kbd">Shift</kbd> + <kbd class="kbd">H</kbd>
+          </div>
+        </div>
+      </div>
+
+      <button class="open-shortcuts-btn" id="openShortcutsBtn">
+        ⌨ Open Chrome Shortcut Settings
+      </button>
+    </div>
+
+    <div class="section-heading">how to set it</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Click the button above</div>
+          <div class="step-desc">It opens <strong>chrome://extensions/shortcuts</strong> in a new tab — the official Chrome page for managing extension keyboard shortcuts.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Find CHARITRA in the list</div>
+          <div class="step-desc">Scroll to the CHARITRA entry. You'll see "Activate the extension" with an empty shortcut box.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Click the pencil icon and press your shortcut</div>
+          <div class="step-desc">Click the edit (✏) icon next to the shortcut box, then press your desired key combination. Chrome will confirm it's accepted. Avoid keys already used by Chrome (e.g. Ctrl+T, Ctrl+W).</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Try it out</div>
+          <div class="step-desc">Press your shortcut from any tab. The CHARITRA popup will open immediately.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security -->
+  <div class="panel" id="tab-security">
+    <div class="section-heading">security architecture</div>
+    <div class="security-grid" style="margin-bottom:24px;">
+      <div class="security-item">
+        <div class="security-item-title">AES-256-GCM Encryption</div>
+        <div class="security-item-desc">All vault data and blocked domain lists are encrypted with AES-256-GCM before being written to Chrome storage. The stored bytes are opaque Base64 — unreadable from DevTools or the filesystem.</div>
+      </div>
+      <div class="security-item">
+        <div class="security-item-title">PBKDF2 Password Hashing</div>
+        <div class="security-item-desc">Your password is run through PBKDF2-SHA256 with 310,000 iterations (OWASP 2023 recommended). Only the derived hash + salt is stored. The password itself never touches storage.</div>
+      </div>
+      <div class="security-item">
+        <div class="security-item-title">Password Never Stored</div>
+        <div class="security-item-desc">The decryption key is derived on-the-fly from your password each time you unlock. When the popup closes, the key is gone. There is no way to decrypt the vault without the correct password.</div>
+      </div>
+      <div class="security-item">
+        <div class="security-item-title">Shadow Domain List</div>
+        <div class="security-item-desc">The background service worker needs to know which domains to block without access to your password. A plaintext shadow copy of domain names only (no URLs, titles, or timestamps) is kept for this purpose.</div>
+      </div>
+      <div class="security-item">
+        <div class="security-item-title">Session Timeout</div>
+        <div class="security-item-desc">Configurable auto-lock after 1–1440 minutes of inactivity. You can also enable lock-on-blur to lock the vault the moment the popup loses focus or you switch windows.</div>
+      </div>
+      <div class="security-item">
+        <div class="security-item-title">Filesystem Unreadable</div>
+        <div class="security-item-desc">Even if someone accesses your Chrome profile folder directly, all they'll find is a blob of AES-GCM ciphertext. Without your password it is computationally infeasible to recover the data.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">what to keep in mind</div>
+    <p style="font-size:12px;font-weight:300;color:var(--fg-secondary);line-height:1.7;max-width:640px;">
+      CHARITRA protects your history from casual inspection and filesystem snooping. It is not a replacement for a full disk encryption solution or a privacy-focused browser. Chrome itself (and your OS) still have access to network traffic and open tabs. For maximum privacy combine CHARITRA with a VPN and private DNS.
+      <br><br>
+      The extension is fully open source — audit the code at <a href="https://github.com/pramodbeema/CHARITRA" target="_blank" style="color:var(--accent-light);">github.com/pramodbeema/CHARITRA</a>.
+    </p>
+  </div>
+
+</div><!-- /shell -->
+
+<!-- CTA bar -->
+<div class="cta-bar">
+  <div class="cta-text">Ready to take control of your browsing history?</div>
+  <div class="cta-actions">
+    <button class="cta-btn primary" id="ctaOpenExtension">Open Extension →</button>
+    <a class="cta-btn" href="https://github.com/pramodbeema/CHARITRA" target="_blank">★ Star on GitHub</a>
+  </div>
+</div>
+
+<!-- GitHub bar -->
+<div class="github-bar">
+  <span style="font-size:12px;color:var(--fg-secondary);">Open Source · MIT License</span>
+  <a href="https://github.com/pramodbeema/CHARITRA" target="_blank">github.com/pramodbeema/CHARITRA</a>
+  <span class="github-star">Made with ❤ and the Nokia Lumia spirit</span>
+</div>
+
+<script src="../js/welcome.js"></script>
+</body>
+</html>

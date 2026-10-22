@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CHARITRA Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/metro.css" />
+  <style>
+    .brand-name {
+      font-family: 'Bebas Neue', 'Impact', 'Arial Black', sans-serif;
+      font-size: 42px; font-weight: 400; letter-spacing: 3px;
+      color: #fff; line-height: 1;
+      text-shadow: 2px 2px 0 var(--accent-dark), 3px 3px 0 rgba(0,0,0,.5);
+    }
+    .brand-sub {
+      font-size: 10px; text-transform: uppercase; letter-spacing: 3px;
+      color: var(--accent-light); margin-top: 3px;
+    }
+    .github-link {
+      font-size: 11px; color: var(--fg-tertiary); text-align: right;
+    }
+    .github-link a { color: var(--accent-light); text-decoration: none; }
+    .github-link a:hover { text-decoration: underline; }
+  </style>
+  <style>
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: var(--font);
+    }
+
+    /* ── App shell ── */
+    .vault-shell {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 0 40px;
+    }
+
+    /* ── Masthead ── */
+    .vault-masthead {
+      padding: 24px 32px 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .vault-masthead-left .page-title {
+      font-size: 42px;
+      font-weight: 300;
+      letter-spacing: -2px;
+      line-height: 1;
+      text-transform: lowercase;
+    }
+    .vault-masthead-left .page-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--accent-light);
+      margin-top: 4px;
+    }
+    .vault-masthead-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Pivot ── */
+    .vault-pivot-header {
+      padding: 16px 32px 0;
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .vault-pivot-tab {
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--fg-tertiary);
+      padding: 8px 16px 10px 0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color var(--transition);
+      background: none;
+      border: none;
+      outline: none;
+      letter-spacing: -0.5px;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .vault-pivot-tab.active {
+      color: var(--fg);
+      border-bottom-color: var(--accent);
+    }
+    .vault-pivot-tab:hover:not(.active) { color: rgba(255,255,255,0.65); }
+
+    .vault-panel { display: none; padding: 24px 32px; }
+    .vault-panel.active { display: block; animation: slideIn 200ms ease; }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .stat-tile {
+      background: var(--accent);
+      padding: 16px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-tile.neutral { background: #222; }
+    .stat-tile .num {
+      font-size: 36px;
+      font-weight: 300;
+      line-height: 1;
+    }
+    .stat-tile .lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      opacity: 0.85;
+    }
+
+    /* ── Toolbar ── */
+    .vault-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .vault-toolbar .metro-search { flex: 1; min-width: 200px; margin-bottom: 0; }
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--fg-secondary);
+      padding: 6px 12px;
+      font-size: 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Vault table ── */
+    .vault-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .vault-table th {
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--fg-tertiary);
+      padding: 6px 8px 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-weight: 400;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .vault-table th:hover { color: var(--fg-secondary); }
+    .vault-table th.sort-asc::after  { content: ' ↑'; color: var(--accent-light); }
+    .vault-table th.sort-desc::after { content: ' ↓'; color: var(--accent-light); }
+    .vault-table td {
+      padding: 9px 8px 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      vertical-align: middle;
+    }
+    .vault-table tr:last-child td { border-bottom: none; }
+    .vault-table tr:hover td { background: var(--surface); }
+    .vault-table .col-cb   { width: 28px; }
+    .vault-table .col-title { max-width: 280px; }
+    .vault-table .col-domain { width: 160px; }
+    .vault-table .col-date  { width: 140px; white-space: nowrap; }
+    .vault-table .col-acts  { width: 60px; text-align: right; }
+
+    .vtitle {
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 280px;
+      display: block;
+      cursor: pointer;
+      color: var(--fg);
+    }
+    .vtitle:hover { color: var(--accent-light); }
+    .vurl {
+      font-size: 10px;
+      color: var(--fg-tertiary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 280px;
+      display: block;
+    }
+    .vdomain {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--accent-light);
+    }
+    .vdomain-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .vdate { font-size: 11px; color: var(--fg-secondary); }
+    .row-del {
+      background: none;
+      border: none;
+      color: var(--fg-tertiary);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 6px;
+      transition: color var(--transition);
+    }
+    .row-del:hover { color: var(--danger); }
+
+    /* ── Domains tab ── */
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .domain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background var(--transition);
+    }
+    .domain-card:hover { background: var(--surface-hover); }
+    .domain-card-letter {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 300;
+      flex-shrink: 0;
+    }
+    .domain-card-name {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .domain-card-del {
+      background: none;
+      border: none;
+      color: var(--fg-tertiary);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 14px;
+      transition: color var(--transition);
+      line-height: 1;
+    }
+    .domain-card-del:hover { color: var(--danger); }
+
+    /* ── Analytics tab ── */
+    .analytics-section { margin-bottom: 24px; }
+    .analytics-section h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-light);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 12px;
+    }
+    .top-domain-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .tdb-label {
+      width: 160px;
+      font-size: 12px;
+      text-align: right;
+      color: var(--fg-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tdb-bar-track {
+      flex: 1;
+      height: 20px;
+      background: rgba(255,255,255,0.06);
+      position: relative;
+    }
+    .tdb-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 400ms cubic-bezier(0.1, 0.9, 0.2, 1);
+    }
+    .tdb-count {
+      width: 40px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+    .activity-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 3px;
+    }
+    .activity-cell {
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.06);
+      title: attr(title);
+    }
+    .activity-cell.l1 { background: rgba(0,120,212,0.3); }
+    .activity-cell.l2 { background: rgba(0,120,212,0.55); }
+    .activity-cell.l3 { background: rgba(0,120,212,0.8); }
+    .activity-cell.l4 { background: #0078d4; }
+
+    /* ── Pagination ── */
+    .vault-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--fg-secondary);
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .page-btn:hover, .page-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .page-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    .page-info {
+      font-size: 11px;
+      color: var(--fg-secondary);
+      padding: 0 8px;
+    }
+
+    /* ── Bulk add panel ── */
+    .bulk-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Snack ── */
+    #vaultSnack {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      padding: 10px 20px;
+      opacity: 0;
+      transition: opacity 200ms, transform 200ms;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    #vaultSnack.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #vaultSnack.error { background: var(--danger); }
+
+    /* ── Lock overlay ── */
+    #vaultLock {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      gap: 16px;
+      padding: 24px;
+    }
+    #vaultLock.hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- ── LOCK ── -->
+  <div id="vaultLock">
+    <div style="font-size:56px;">🔒</div>
+    <div style="font-family:'Bebas Neue','Impact','Arial Black',sans-serif;font-size:40px;letter-spacing:3px;text-shadow:2px 2px 0 var(--accent-dark),3px 3px 0 rgba(0,0,0,.5);">CHARITRA</div>
+    <div style="font-size:10px;color:var(--fg-secondary);text-transform:uppercase;letter-spacing:2px;">vault access</div>
+    <div style="width:100%;max-width:280px;" class="metro-stack gap-md">
+      <div class="metro-input-group" style="margin-bottom:0;">
+        <label class="metro-input-label">password</label>
+        <div class="metro-password-wrapper">
+          <input type="password" class="metro-input" id="vaultPw" placeholder="enter password" autocomplete="current-password" />
+          <button class="metro-password-reveal" id="vaultReveal">👁</button>
+        </div>
+      </div>
+      <div style="color:var(--danger);font-size:12px;min-height:16px;" id="vaultLockError"></div>
+      <button class="metro-btn accent full-width" id="vaultUnlock">unlock vault</button>
+    </div>
+  </div>
+
+  <!-- ── MAIN ── -->
+  <div class="vault-shell hidden" id="vaultMain">
+
+    <!-- Masthead -->
+    <div class="vault-masthead">
+      <div class="vault-masthead-left">
+        <div class="brand-name">CHARITRA</div>
+        <div class="brand-sub">private history vault</div>
+      </div>
+      <div class="vault-masthead-right">
+        <div class="github-link" style="margin-right:8px;">
+          <a href="https://github.com/pramodbeema/CHARITRA" target="_blank">
+            github.com/pramodbeema/CHARITRA
+          </a>
+        </div>
+        <span id="vaultStatus" class="status-pill" title="Click to toggle protection on/off" style="cursor:pointer;">ON</span>
+        <button class="metro-btn" id="vaultSweepBtn" style="font-size:11px;padding:6px 12px;">🔄 sweep now</button>
+        <button class="metro-btn danger" id="vaultLockBtn" style="font-size:11px;padding:6px 12px;">🔒 lock</button>
+      </div>
+    </div>
+
+    <!-- Pivot -->
+    <div class="vault-pivot-header" id="vaultPivotHeader">
+      <button class="vault-pivot-tab active" data-tab="entries">history vault</button>
+      <button class="vault-pivot-tab" data-tab="domains">blocked domains</button>
+      <button class="vault-pivot-tab" data-tab="analytics">analytics</button>
+    </div>
+
+    <!-- ── ENTRIES PANEL ── -->
+    <div class="vault-panel active" id="vtab-entries">
+      <div class="stats-row" id="statsRow"></div>
+
+      <div class="vault-toolbar">
+        <div class="metro-search">
+          <input type="text" class="metro-search-input" id="tableSearch" placeholder="search by title, domain, url…" />
+        </div>
+        <button class="filter-btn active" data-filter="all">all</button>
+        <button class="filter-btn" data-filter="today">today</button>
+        <button class="filter-btn" data-filter="week">this week</button>
+      </div>
+
+      <!-- Date range row -->
+      <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:10px;flex-wrap:wrap;">
+        <div class="metro-input-group" style="margin-bottom:0;flex:1;min-width:120px;">
+          <label class="metro-input-label">from date</label>
+          <input type="date" class="metro-input metro-date-input" id="tableDateFrom" />
+        </div>
+        <div class="metro-input-group" style="margin-bottom:0;flex:1;min-width:120px;">
+          <label class="metro-input-label">to date</label>
+          <input type="date" class="metro-input metro-date-input" id="tableDateTo" />
+        </div>
+        <button class="filter-btn" id="tableClearDates" style="align-self:flex-end;">✕ dates</button>
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--fg-secondary);cursor:pointer;">
+          <input type="checkbox" id="tableSelectAll" style="accent-color:var(--accent);" />
+          select all visible
+        </label>
+        <button class="metro-btn" id="tableDeleteSelected" style="font-size:11px;padding:5px 10px;" disabled>delete selected</button>
+        <button class="metro-btn danger" id="tableClearAll" style="font-size:11px;padding:5px 10px;">clear all</button>
+        <button class="metro-btn" id="tableExport" style="font-size:11px;padding:5px 10px;">⬇ export JSON</button>
+        <span class="metro-caption" id="tableEntryCount" style="margin-left:auto;"></span>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="vault-table">
+          <thead>
+            <tr>
+              <th class="col-cb"></th>
+              <th class="col-title" data-sort="title">page title</th>
+              <th class="col-domain" data-sort="domain">domain</th>
+              <th class="col-date" data-sort="visitedAt">visited</th>
+              <th class="col-acts"></th>
+            </tr>
+          </thead>
+          <tbody id="vaultTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="vault-pagination" id="vaultPagination"></div>
+    </div>
+
+    <!-- ── DOMAINS PANEL ── -->
+    <div class="vault-panel" id="vtab-domains">
+      <div class="bulk-panel">
+        <div class="metro-row gap-8 mb-8">
+          <input type="text" class="metro-input flex-1" id="vaultAddDomain" placeholder="domain.com or https://example.com" />
+          <button class="metro-btn accent" id="vaultAddDomainBtn" style="font-size:12px;">add</button>
+        </div>
+        <div class="metro-input-group mb-8">
+          <label class="metro-input-label">bulk add (one per line)</label>
+          <textarea class="metro-textarea" id="vaultBulkDomains" rows="3" placeholder="google.com&#10;facebook.com&#10;reddit.com"></textarea>
+        </div>
+        <button class="metro-btn accent" id="vaultBulkAddBtn" style="font-size:12px;">⊞ add all from list</button>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="metro-search" style="flex:1;margin-bottom:0;margin-right:12px;">
+          <input type="text" class="metro-search-input" id="vaultDomainSearch" placeholder="search domains…" />
+        </div>
+        <span class="metro-caption" id="vaultDomainCount">0 domains</span>
+        <button class="metro-btn danger" id="vaultClearDomains" style="font-size:11px;padding:5px 10px;margin-left:8px;">clear all</button>
+      </div>
+
+      <div class="domain-grid" id="vaultDomainGrid"></div>
+    </div>
+
+    <!-- ── ANALYTICS PANEL ── -->
+    <div class="vault-panel" id="vtab-analytics">
+      <div class="stats-row" id="analyticsStats"></div>
+
+      <div class="analytics-section">
+        <h3>top blocked domains</h3>
+        <div id="topDomainBars"></div>
+      </div>
+
+      <div class="analytics-section">
+        <h3>activity over last 12 months</h3>
+        <div class="activity-grid" id="activityGrid"></div>
+        <div class="metro-row" style="justify-content:flex-end;margin-top:6px;gap:8px;">
+          <span class="metro-caption">less</span>
+          <div style="display:flex;gap:2px;">
+            <div style="width:12px;height:12px;background:rgba(255,255,255,0.06);"></div>
+            <div style="width:12px;height:12px;background:rgba(0,120,212,0.3);"></div>
+            <div style="width:12px;height:12px;background:rgba(0,120,212,0.6);"></div>
+            <div style="width:12px;height:12px;background:#0078d4;"></div>
+          </div>
+          <span class="metro-caption">more</span>
+        </div>
+      </div>
+
+      <div class="analytics-section">
+        <h3>visits by hour of day</h3>
+        <div id="hourChart" style="display:flex;align-items:flex-end;gap:2px;height:60px;"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:2px;">
+          <span class="metro-caption">12am</span>
+          <span class="metro-caption">6am</span>
+          <span class="metro-caption">12pm</span>
+          <span class="metro-caption">6pm</span>
+          <span class="metro-caption">11pm</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── CONFIRM DIALOG ── -->
+  <div class="metro-overlay hidden" id="vaultConfirmDialog">
+    <div class="metro-dialog">
+      <div class="metro-dialog-title" id="vaultConfirmTitle">confirm</div>
+      <div class="metro-dialog-body"><div class="metro-body" id="vaultConfirmBody"></div></div>
+      <div class="metro-dialog-actions">
+        <button class="metro-btn" id="vaultConfirmNo">cancel</button>
+        <button class="metro-btn danger" id="vaultConfirmYes">confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snack -->
+  <div id="vaultSnack"></div>
+
+  <style>
+    .status-pill { display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;background:var(--success);color:#fff;text-transform:uppercase;letter-spacing:.5px; }
+    .status-pill.off { background:var(--danger); }
+  </style>
+
+  <script type="module" src="../js/vault.js"></script>
+</body>
+</html>
