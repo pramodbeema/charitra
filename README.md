@@ -81,6 +81,18 @@ CHARITRA is a Chrome extension that silently removes specific domains from your 
 
 ---
 
+## Downloads & Releases
+
+Pre-packaged distribution archives are available on the [GitHub Releases](https://github.com/pramodbeema/charitra/releases):
+
+| Archive | Size | Description |
+|---|---|---|
+| [Charitra-Chrome-WebStore-Upload.zip](https://github.com/pramodbeema/charitra/releases/download/v1.0.0/Charitra-Chrome-WebStore-Upload.zip) | ~150 KB | Clean runtime zip ready for direct upload to Google Chrome Web Store |
+| [Charitra-Chrome-Cloud-Backup.zip](https://github.com/pramodbeema/charitra/releases/download/v1.0.0/Charitra-Chrome-Cloud-Backup.zip) | ~2.5 MB | Complete standalone offline archive containing source, docs, and high-res store assets |
+| [Firefox Edition (CharitraGecko)](https://github.com/pramodbeema/charitragecko) | - | Gecko MV3 edition built specifically for Mozilla Firefox and AMO |
+
+---
+
 ## Installation
 
 ### From Source (Developer Mode)
@@ -194,11 +206,10 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## License
 
-[MIT](LICENSE) © [Pramod Beema](https://github.com/pramodbeema)
+[GNU General Public License v3.0 (GPLv3)](LICENSE) © [Pramod Beema](https://github.com/pramodbeema)
 
 ---
 
 <div align="center">
-  <sub>Built with ❤ and the Nokia Lumia spirit &nbsp;·&nbsp; <a href="https://github.com/pramodbeema/charitra">github.com/pramodbeema/CHARITRA</a></sub>
+  <sub>Built with ❤ and the Nokia Lumia spirit &nbsp;·&nbsp; <a href="https://github.com/pramodbeema/charitra">github.com/pramodbeema/charitra</a></sub>
 </div>
-#
