@@ -28,7 +28,22 @@ let vaultConfirmCallback = null;
 // ── Boot ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
   if (!await isSetup()) {
-    el('vaultLock').innerHTML = `<div style="font-size:32px;">🛡</div><div style="font-size:20px;font-weight:300;">no vault found</div><div style="font-size:13px;color:var(--fg-secondary);">Open the extension popup to set up your vault.</div>`;
+    const lockEl = el('vaultLock');
+    lockEl.textContent = '';
+    const icon = document.createElement('div');
+    icon.style.fontSize = '32px';
+    icon.textContent = '🛡';
+    const title = document.createElement('div');
+    title.style.fontSize = '20px';
+    title.style.fontWeight = '300';
+    title.textContent = 'no vault found';
+    const desc = document.createElement('div');
+    desc.style.fontSize = '13px';
+    desc.style.color = 'var(--fg-secondary)';
+    desc.textContent = 'Open the extension popup to set up your vault.';
+    lockEl.appendChild(icon);
+    lockEl.appendChild(title);
+    lockEl.appendChild(desc);
     return;
   }
   await applyAccentFromConfig();
@@ -305,52 +320,95 @@ function renderTable() {
   const tbody   = el('vaultTableBody');
   const start   = (page - 1) * PAGE_SIZE;
   const visible = filtered.slice(start, start + PAGE_SIZE);
+  tbody.textContent = '';
 
   if (!visible.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--fg-tertiary);">${searchQuery || activeFilter !== 'all' ? 'No results match your filter' : 'Vault is empty'}</td></tr>`;
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 5;
+    td.style.textAlign = 'center';
+    td.style.padding = '40px';
+    td.style.color = 'var(--fg-tertiary)';
+    td.textContent = (searchQuery || activeFilter !== 'all') ? 'No results match your filter' : 'Vault is empty';
+    tr.appendChild(td);
+    tbody.appendChild(tr);
     el('tableDeleteSelected').disabled = true;
     return;
   }
 
-  tbody.innerHTML = visible.map(e => `
-    <tr data-id="${e.id}">
-      <td class="col-cb">
-        <input type="checkbox" class="row-cb" data-id="${e.id}" ${selectedIds.has(e.id) ? 'checked' : ''} style="accent-color:var(--accent);" />
-      </td>
-      <td class="col-title">
-        <span class="vtitle" data-url="${esc(e.url)}" title="${esc(e.url)}">${esc(e.title || e.domain)}</span>
-        <span class="vurl">${esc(e.url)}</span>
-      </td>
-      <td class="col-domain">
-        <span class="vdomain">
-          <span class="vdomain-dot"></span>
-          ${esc(e.domain)}
-        </span>
-      </td>
-      <td class="col-date"><span class="vdate">${formatFull(e.visitedAt)}</span></td>
-      <td class="col-acts">
-        <button class="row-del" data-id="${e.id}" title="Delete entry">✕</button>
-      </td>
-    </tr>
-  `).join('');
+  visible.forEach(e => {
+    const tr = document.createElement('tr');
+    tr.dataset.id = e.id;
 
-  tbody.querySelectorAll('.row-cb').forEach(cb => {
+    // Col 1: Checkbox
+    const tdCb = document.createElement('td');
+    tdCb.className = 'col-cb';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'row-cb';
+    cb.dataset.id = e.id;
+    cb.checked = selectedIds.has(e.id);
+    cb.style.accentColor = 'var(--accent)';
     cb.addEventListener('change', () => {
-      cb.checked ? selectedIds.add(cb.dataset.id) : selectedIds.delete(cb.dataset.id);
+      cb.checked ? selectedIds.add(e.id) : selectedIds.delete(e.id);
       updateDeleteBtn();
       updateSelectAllState();
     });
-  });
+    tdCb.appendChild(cb);
 
-  tbody.querySelectorAll('.row-del').forEach(btn => {
-    btn.onclick = async () => {
-      const id = btn.dataset.id;
-      await doDeleteOne(id);
+    // Col 2: Title & URL
+    const tdTitle = document.createElement('td');
+    tdTitle.className = 'col-title';
+    const spanTitle = document.createElement('span');
+    spanTitle.className = 'vtitle';
+    spanTitle.dataset.url = e.url;
+    spanTitle.title = e.url;
+    spanTitle.textContent = e.title || e.domain;
+    spanTitle.onclick = () => window.open(e.url, '_blank');
+    const spanUrl = document.createElement('span');
+    spanUrl.className = 'vurl';
+    spanUrl.textContent = e.url;
+    tdTitle.appendChild(spanTitle);
+    tdTitle.appendChild(spanUrl);
+
+    // Col 3: Domain
+    const tdDomain = document.createElement('td');
+    tdDomain.className = 'col-domain';
+    const spanDom = document.createElement('span');
+    spanDom.className = 'vdomain';
+    const dot = document.createElement('span');
+    dot.className = 'vdomain-dot';
+    spanDom.appendChild(dot);
+    spanDom.appendChild(document.createTextNode(' ' + e.domain));
+    tdDomain.appendChild(spanDom);
+
+    // Col 4: Date
+    const tdDate = document.createElement('td');
+    tdDate.className = 'col-date';
+    const spanDate = document.createElement('span');
+    spanDate.className = 'vdate';
+    spanDate.textContent = formatFull(e.visitedAt);
+    tdDate.appendChild(spanDate);
+
+    // Col 5: Actions
+    const tdActs = document.createElement('td');
+    tdActs.className = 'col-acts';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'row-del';
+    delBtn.dataset.id = e.id;
+    delBtn.title = 'Delete entry';
+    delBtn.textContent = '✕';
+    delBtn.onclick = async () => {
+      await doDeleteOne(e.id);
     };
-  });
+    tdActs.appendChild(delBtn);
 
-  tbody.querySelectorAll('.vtitle').forEach(span => {
-    span.onclick = () => window.open(span.dataset.url, '_blank');
+    tr.appendChild(tdCb);
+    tr.appendChild(tdTitle);
+    tr.appendChild(tdDomain);
+    tr.appendChild(tdDate);
+    tr.appendChild(tdActs);
+    tbody.appendChild(tr);
   });
 
   updateDeleteBtn();
@@ -401,30 +459,46 @@ function updateSelectAllState() {
 function renderPagination() {
   const total = Math.ceil(filtered.length / PAGE_SIZE);
   const el_   = el('vaultPagination');
-  if (total <= 1) { el_.innerHTML = ''; return; }
+  el_.textContent = '';
+  if (total <= 1) return;
 
-  let html = `<button class="page-btn" id="pgPrev" ${page === 1 ? 'disabled' : ''}>‹</button>`;
+  const btnPrev = document.createElement('button');
+  btnPrev.className = 'page-btn';
+  btnPrev.id = 'pgPrev';
+  btnPrev.textContent = '‹';
+  if (page === 1) btnPrev.disabled = true;
+  btnPrev.onclick = () => { if (page > 1) { page--; applyFilter(); } };
+  el_.appendChild(btnPrev);
 
   const range = getPaginationRange(page, total);
   range.forEach(p => {
     if (p === '…') {
-      html += `<span class="page-info">…</span>`;
+      const span = document.createElement('span');
+      span.className = 'page-info';
+      span.textContent = '…';
+      el_.appendChild(span);
     } else {
-      html += `<button class="page-btn ${p === page ? 'active' : ''}" data-page="${p}">${p}</button>`;
+      const btn = document.createElement('button');
+      btn.className = `page-btn ${p === page ? 'active' : ''}`;
+      btn.dataset.page = p;
+      btn.textContent = p;
+      btn.onclick = () => { page = p; applyFilter(); };
+      el_.appendChild(btn);
     }
   });
 
-  html += `<button class="page-btn" id="pgNext" ${page === total ? 'disabled' : ''}>›</button>`;
-  html += `<span class="page-info">${page} / ${total}</span>`;
-  el_.innerHTML = html;
+  const btnNext = document.createElement('button');
+  btnNext.className = 'page-btn';
+  btnNext.id = 'pgNext';
+  btnNext.textContent = '›';
+  if (page === total) btnNext.disabled = true;
+  btnNext.onclick = () => { if (page < total) { page++; applyFilter(); } };
+  el_.appendChild(btnNext);
 
-  el_.querySelectorAll('[data-page]').forEach(btn => {
-    btn.onclick = () => { page = parseInt(btn.dataset.page); applyFilter(); };
-  });
-  const prev = el_.querySelector('#pgPrev');
-  const next = el_.querySelector('#pgNext');
-  if (prev) prev.onclick = () => { if (page > 1) { page--; applyFilter(); } };
-  if (next) next.onclick = () => { if (page < total) { page++; applyFilter(); } };
+  const spanInfo = document.createElement('span');
+  spanInfo.className = 'page-info';
+  spanInfo.textContent = `${page} / ${total}`;
+  el_.appendChild(spanInfo);
 }
 
 function getPaginationRange(current, total) {
@@ -452,20 +526,32 @@ function renderStats() {
   const todayCount = vault.filter(e => e.visitedAt >= today.getTime()).length;
   const weekCount  = vault.filter(e => e.visitedAt >= week.getTime()).length;
 
-  const statsHtml = [
+  const statsList = [
     { num: vault.length,        lbl: 'total captured', cls: '' },
     { num: domains.length,      lbl: 'domains blocked', cls: '' },
     { num: todayCount,          lbl: 'today',          cls: 'neutral' },
     { num: weekCount,           lbl: 'this week',      cls: 'neutral' },
-  ].map(s => `
-    <div class="stat-tile ${s.cls}">
-      <div class="num">${s.num}</div>
-      <div class="lbl">${s.lbl}</div>
-    </div>
-  `).join('');
+  ];
 
-  el('statsRow').innerHTML      = statsHtml;
-  el('analyticsStats').innerHTML = statsHtml;
+  function populateStats(container) {
+    container.textContent = '';
+    statsList.forEach(s => {
+      const tile = document.createElement('div');
+      tile.className = `stat-tile ${s.cls}`.trim();
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = s.num;
+      const lbl = document.createElement('div');
+      lbl.className = 'lbl';
+      lbl.textContent = s.lbl;
+      tile.appendChild(num);
+      tile.appendChild(lbl);
+      container.appendChild(tile);
+    });
+  }
+
+  populateStats(el('statsRow'));
+  populateStats(el('analyticsStats'));
 }
 
 // ── Domains tab ───────────────────────────────────────────────────────────────
@@ -501,28 +587,55 @@ function renderDomainGrid() {
   el('vaultDomainCount').textContent = `${filtered.length} domain${filtered.length !== 1 ? 's' : ''}`;
   const grid = el('vaultDomainGrid');
 
+  grid.textContent = '';
   if (!filtered.length) {
-    grid.innerHTML = `<div class="metro-empty" style="padding:40px;grid-column:1/-1;"><div class="metro-empty-icon">🛡</div><div class="metro-empty-text">${query ? 'no match' : 'no blocked domains'}</div></div>`;
+    const empty = document.createElement('div');
+    empty.className = 'metro-empty';
+    empty.style.padding = '40px';
+    empty.style.gridColumn = '1/-1';
+    const icon = document.createElement('div');
+    icon.className = 'metro-empty-icon';
+    icon.textContent = '🛡';
+    const text = document.createElement('div');
+    text.className = 'metro-empty-text';
+    text.textContent = query ? 'no match' : 'no blocked domains';
+    empty.appendChild(icon);
+    empty.appendChild(text);
+    grid.appendChild(empty);
     return;
   }
 
-  grid.innerHTML = filtered.map(d => `
-    <div class="domain-card">
-      <div class="domain-card-letter">${d[0].toUpperCase()}</div>
-      <span class="domain-card-name" title="${esc(d)}">${esc(d)}</span>
-      <button class="domain-card-del" data-domain="${esc(d)}" title="Unblock">✕</button>
-    </div>
-  `).join('');
+  filtered.forEach(d => {
+    const card = document.createElement('div');
+    card.className = 'domain-card';
 
-  grid.querySelectorAll('.domain-card-del').forEach(btn => {
-    btn.onclick = async () => {
-      domains = domains.filter(d => d !== btn.dataset.domain);
+    const letter = document.createElement('div');
+    letter.className = 'domain-card-letter';
+    letter.textContent = d[0].toUpperCase();
+
+    const name = document.createElement('span');
+    name.className = 'domain-card-name';
+    name.title = d;
+    name.textContent = d;
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'domain-card-del';
+    delBtn.dataset.domain = d;
+    delBtn.title = 'Unblock';
+    delBtn.textContent = '✕';
+    delBtn.onclick = async () => {
+      domains = domains.filter(item => item !== d);
       await saveBlockedDomains(domains, PASSWORD);
       await updateShadow(domains);
       renderDomainGrid();
       renderStats();
-      snack(`${btn.dataset.domain} unblocked`);
+      snack(`${d} unblocked`);
     };
+
+    card.appendChild(letter);
+    card.appendChild(name);
+    card.appendChild(delBtn);
+    grid.appendChild(card);
   });
 }
 
@@ -538,20 +651,46 @@ function renderTopDomains() {
   vault.forEach(e => { counts[e.domain] = (counts[e.domain] || 0) + 1; });
   const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, 10);
   const max    = sorted[0]?.[1] || 1;
+  const container = el('topDomainBars');
+  container.textContent = '';
 
-  el('topDomainBars').innerHTML = sorted.map(([d, c]) => `
-    <div class="top-domain-bar">
-      <span class="tdb-label">${esc(d)}</span>
-      <div class="tdb-bar-track">
-        <div class="tdb-bar-fill" style="width:${(c/max*100).toFixed(1)}%"></div>
-      </div>
-      <span class="tdb-count">${c}</span>
-    </div>
-  `).join('') || '<div class="metro-caption" style="padding:8px 0;">No data yet</div>';
+  if (!sorted.length) {
+    const empty = document.createElement('div');
+    empty.className = 'metro-caption';
+    empty.style.padding = '8px 0';
+    empty.textContent = 'No data yet';
+    container.appendChild(empty);
+    return;
+  }
+
+  sorted.forEach(([d, c]) => {
+    const row = document.createElement('div');
+    row.className = 'top-domain-bar';
+
+    const label = document.createElement('span');
+    label.className = 'tdb-label';
+    label.textContent = d;
+
+    const track = document.createElement('div');
+    track.className = 'tdb-bar-track';
+    const fill = document.createElement('div');
+    fill.className = 'tdb-bar-fill';
+    fill.style.width = `${(c / max * 100).toFixed(1)}%`;
+    track.appendChild(fill);
+
+    const count = document.createElement('span');
+    count.className = 'tdb-count';
+    count.textContent = c;
+
+    row.appendChild(label);
+    row.appendChild(track);
+    row.appendChild(count);
+    container.appendChild(row);
+  });
 }
 
 function renderActivityGrid() {
-  const now      = new Date();
+  const now = new Date();
   const monthCounts = {};
   vault.forEach(e => {
     const d = new Date(e.visitedAt);
@@ -559,16 +698,20 @@ function renderActivityGrid() {
     monthCounts[key] = (monthCounts[key] || 0) + 1;
   });
 
-  const cells = [];
+  const grid = el('activityGrid');
+  grid.textContent = '';
   for (let m = 11; m >= 0; m--) {
-    const d   = new Date(now.getFullYear(), now.getMonth() - m, 1);
+    const d = new Date(now.getFullYear(), now.getMonth() - m, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     const cnt = monthCounts[key] || 0;
     const lvl = cnt === 0 ? '' : cnt < 5 ? 'l1' : cnt < 20 ? 'l2' : cnt < 50 ? 'l3' : 'l4';
     const mon = d.toLocaleString('default', { month: 'short' });
-    cells.push(`<div class="activity-cell ${lvl}" title="${mon} ${d.getFullYear()}: ${cnt} visits"></div>`);
+    
+    const cell = document.createElement('div');
+    cell.className = `activity-cell ${lvl}`.trim();
+    cell.title = `${mon} ${d.getFullYear()}: ${cnt} visits`;
+    grid.appendChild(cell);
   }
-  el('activityGrid').innerHTML = cells.join('');
 }
 
 function renderHourChart() {
@@ -578,10 +721,18 @@ function renderHourChart() {
     hours[h]++;
   });
   const max = Math.max(...hours, 1);
+  const chart = el('hourChart');
+  chart.textContent = '';
 
-  el('hourChart').innerHTML = hours.map((c, h) => `
-    <div style="flex:1;background:var(--accent);opacity:${0.2 + 0.8*(c/max)};height:${Math.max(4, Math.round(c/max*60))}px;" title="${h}:00 — ${c} visits"></div>
-  `).join('');
+  hours.forEach((c, h) => {
+    const bar = document.createElement('div');
+    bar.style.flex = '1';
+    bar.style.background = 'var(--accent)';
+    bar.style.opacity = `${0.2 + 0.8 * (c / max)}`;
+    bar.style.height = `${Math.max(4, Math.round(c / max * 60))}px`;
+    bar.title = `${h}:00 — ${c} visits`;
+    chart.appendChild(bar);
+  });
 }
 
 // ── Export ────────────────────────────────────────────────────────────────────

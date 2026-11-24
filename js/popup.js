@@ -436,21 +436,43 @@ function renderDomainList() {
   const filtered = blockedDomainsCache.filter(d => d.includes(query));
   el('domainListCount').textContent = `${filtered.length} domain${filtered.length !== 1 ? 's' : ''}`;
   const list = el('domainList');
+  list.textContent = '';
   if (!filtered.length) {
-    list.innerHTML = `<div class="metro-empty" style="padding:16px;">
-      <div class="metro-empty-icon" style="font-size:24px;">🛡</div>
-      <div class="metro-empty-text" style="font-size:12px;">${query ? 'no match' : 'no blocked domains yet'}</div>
-    </div>`;
+    const empty = document.createElement('div');
+    empty.className = 'metro-empty';
+    empty.style.padding = '16px';
+    const icon = document.createElement('div');
+    icon.className = 'metro-empty-icon';
+    icon.style.fontSize = '24px';
+    icon.textContent = '🛡';
+    const txt = document.createElement('div');
+    txt.className = 'metro-empty-text';
+    txt.style.fontSize = '12px';
+    txt.textContent = query ? 'no match' : 'no blocked domains yet';
+    empty.appendChild(icon);
+    empty.appendChild(txt);
+    list.appendChild(empty);
     return;
   }
-  list.innerHTML = filtered.map(d => `
-    <div class="domain-item">
-      <div class="domain-favicon">${d[0].toUpperCase()}</div>
-      <span class="domain-name" title="${esc(d)}">${esc(d)}</span>
-      <button class="domain-del" data-domain="${esc(d)}" title="Unblock">✕</button>
-    </div>`).join('');
-  list.querySelectorAll('.domain-del').forEach(btn => {
-    btn.onclick = () => doRemoveDomain(btn.dataset.domain);
+  filtered.forEach(d => {
+    const item = document.createElement('div');
+    item.className = 'domain-item';
+    const fav = document.createElement('div');
+    fav.className = 'domain-favicon';
+    fav.textContent = d[0].toUpperCase();
+    const name = document.createElement('span');
+    name.className = 'domain-name';
+    name.title = d;
+    name.textContent = d;
+    const btn = document.createElement('button');
+    btn.className = 'domain-del';
+    btn.title = 'Unblock';
+    btn.textContent = '✕';
+    btn.onclick = () => doRemoveDomain(d);
+    item.appendChild(fav);
+    item.appendChild(name);
+    item.appendChild(btn);
+    list.appendChild(item);
   });
 }
 
@@ -482,42 +504,78 @@ function renderVaultList() {
   el('btnClearVaultSearch').style.display = hasFilter ? 'inline-flex' : 'none';
 
   const list = el('vaultList');
+  list.textContent = '';
   if (!filtered.length) {
     selectedVaultIds.clear(); updateDeleteButton();
-    list.innerHTML = `<div class="metro-empty" style="padding:16px;">
-      <div class="metro-empty-icon" style="font-size:24px;">🔒</div>
-      <div class="metro-empty-text" style="font-size:12px;">${hasFilter ? 'no results' : 'vault is empty'}</div>
-    </div>`;
+    const empty = document.createElement('div');
+    empty.className = 'metro-empty';
+    empty.style.padding = '16px';
+    const icon = document.createElement('div');
+    icon.className = 'metro-empty-icon';
+    icon.style.fontSize = '24px';
+    icon.textContent = '🔒';
+    const txt = document.createElement('div');
+    txt.className = 'metro-empty-text';
+    txt.style.fontSize = '12px';
+    txt.textContent = hasFilter ? 'no results' : 'vault is empty';
+    empty.appendChild(icon);
+    empty.appendChild(txt);
+    list.appendChild(empty);
     return;
   }
 
-  list.innerHTML = filtered.map(e => `
-    <div class="vault-item" data-id="${esc(e.id)}">
-      <div class="vault-item-checkbox">
-        <input type="checkbox" class="vault-item-cb" data-id="${esc(e.id)}"
-               ${selectedVaultIds.has(e.id) ? 'checked' : ''} />
-        <div style="flex:1;min-width:0;">
-          <div class="vault-item-title">${esc(e.title || e.url || e.domain)}</div>
-          <div class="vault-item-meta">
-            <span class="text-accent">${esc(e.domain)}</span>
-            <span>${formatTime(e.visitedAt)}</span>
-          </div>
-        </div>
-      </div>
-    </div>`).join('');
+  filtered.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'vault-item';
+    item.dataset.id = e.id;
 
-  list.querySelectorAll('.vault-item-cb').forEach(cb => {
+    const wrap = document.createElement('div');
+    wrap.className = 'vault-item-checkbox';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'vault-item-cb';
+    cb.dataset.id = e.id;
+    cb.checked = selectedVaultIds.has(e.id);
     cb.addEventListener('change', ev => {
       ev.stopPropagation();
-      cb.checked ? selectedVaultIds.add(cb.dataset.id) : selectedVaultIds.delete(cb.dataset.id);
+      cb.checked ? selectedVaultIds.add(e.id) : selectedVaultIds.delete(e.id);
       updateDeleteButton(); updateSelectAllCheckbox(filtered);
     });
-  });
-  list.querySelectorAll('.vault-item').forEach(item => {
-    item.addEventListener('click', e => {
-      if (e.target.type === 'checkbox') return;
-      openEntryDialog(item.dataset.id);
+
+    const info = document.createElement('div');
+    info.style.flex = '1';
+    info.style.minWidth = '0';
+
+    const title = document.createElement('div');
+    title.className = 'vault-item-title';
+    title.textContent = e.title || e.url || e.domain;
+
+    const meta = document.createElement('div');
+    meta.className = 'vault-item-meta';
+
+    const dom = document.createElement('span');
+    dom.className = 'text-accent';
+    dom.textContent = e.domain;
+
+    const time = document.createElement('span');
+    time.textContent = formatTime(e.visitedAt);
+
+    meta.appendChild(dom);
+    meta.appendChild(time);
+    info.appendChild(title);
+    info.appendChild(meta);
+
+    wrap.appendChild(cb);
+    wrap.appendChild(info);
+    item.appendChild(wrap);
+
+    item.addEventListener('click', ev => {
+      if (ev.target.type === 'checkbox') return;
+      openEntryDialog(e.id);
     });
+
+    list.appendChild(item);
   });
   updateSelectAllCheckbox(filtered); updateDeleteButton();
 }
@@ -532,20 +590,51 @@ function clearVaultSearch() {
 function renderRecentList() {
   const recent = vaultEntriesCache.slice(0, 5);
   const list   = el('recentList');
+  list.textContent = '';
   if (!recent.length) {
-    list.innerHTML = `<div class="metro-empty" style="padding:12px;">
-      <div class="metro-empty-icon" style="font-size:20px;">📂</div>
-      <div class="metro-empty-text" style="font-size:12px;">vault is empty</div>
-    </div>`;
+    const empty = document.createElement('div');
+    empty.className = 'metro-empty';
+    empty.style.padding = '12px';
+    const icon = document.createElement('div');
+    icon.className = 'metro-empty-icon';
+    icon.style.fontSize = '20px';
+    icon.textContent = '📂';
+    const txt = document.createElement('div');
+    txt.className = 'metro-empty-text';
+    txt.style.fontSize = '12px';
+    txt.textContent = 'vault is empty';
+    empty.appendChild(icon);
+    empty.appendChild(txt);
+    list.appendChild(empty);
     return;
   }
-  list.innerHTML = recent.map(e => `
-    <div class="vault-item" data-id="${esc(e.id)}" style="padding:5px 0;cursor:pointer;">
-      <div class="vault-item-title" style="font-size:11px;">${esc(e.title || e.url || e.domain)}</div>
-      <div class="vault-item-meta"><span class="text-accent">${esc(e.domain)}</span><span>${formatTime(e.visitedAt)}</span></div>
-    </div>`).join('');
-  list.querySelectorAll('.vault-item').forEach(item => {
-    item.onclick = () => openEntryDialog(item.dataset.id);
+  recent.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'vault-item';
+    item.dataset.id = e.id;
+    item.style.padding = '5px 0';
+    item.style.cursor = 'pointer';
+
+    const title = document.createElement('div');
+    title.className = 'vault-item-title';
+    title.style.fontSize = '11px';
+    title.textContent = e.title || e.url || e.domain;
+
+    const meta = document.createElement('div');
+    meta.className = 'vault-item-meta';
+    const dom = document.createElement('span');
+    dom.className = 'text-accent';
+    dom.textContent = e.domain;
+    const time = document.createElement('span');
+    time.textContent = formatTime(e.visitedAt);
+
+    meta.appendChild(dom);
+    meta.appendChild(time);
+    item.appendChild(title);
+    item.appendChild(meta);
+
+    item.onclick = () => openEntryDialog(e.id);
+    list.appendChild(item);
   });
 }
 

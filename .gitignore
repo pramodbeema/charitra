@@ -1,0 +1,7 @@
+CharitraGecko/
+store listing images old/
+store listing images new/
+CharitraGecko-Cloud-Backup.zip
+*.zip
+Thumbs.db
+.DS_Store
